@@ -14,7 +14,7 @@ type Circbuf struct {
 func New(cap uint) *Circbuf {
 	// TODO: specify both len and cap as params?
 	// TODO: optional parameters?
-	return &Circbuf{len: 0, cap: cap, elements: make([]interface{}, cap, cap)}
+	return &Circbuf{len: 0, cap: cap, elements: make([]interface{}, cap)}
 }
 
 // Add appends an element to the buffer. If the buffer is full (length ==
