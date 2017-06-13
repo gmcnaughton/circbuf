@@ -1,6 +1,6 @@
-# Circ Buf
+# Circbuf
 
-`circbuf` implements a simple circular buffer. Operations in this library are not thread-safe.
+`circbuf` implements a simple circular buffer in Go. Operations in this library are not thread-safe.
 
 ### Installation
 
