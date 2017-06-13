@@ -15,13 +15,13 @@
   )
 
   buf := circbuf.New(2)
-  buf.Length()   // => 0
-  buf.Capacity() // => 2
+  buf.Len() // => 0
+  buf.Cap() // => 2
 
   buf.Add(1)
   buf.Add(2)
   buf.Add(3)
-  buf.ForEach(func(el interface{}) {
+  buf.Do(func(el interface{}) {
     fmt.Println(el) // => 2, 3
   })
 ```

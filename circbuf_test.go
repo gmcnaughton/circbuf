@@ -4,32 +4,32 @@ import (
 	"testing"
 )
 
-func TestLengthOfEmptyBuffer(t *testing.T) {
+func TestLenWithEmptyBuffer(t *testing.T) {
 	c := New(1)
-	if c.Length() != 0 {
-		t.Error("Expected empty buffer to have length 0, was", c.Length())
+	if c.Len() != 0 {
+		t.Error("Expected empty buffer to have length 0, was", c.Len())
 	}
 }
 
-func TestLengthOfBufferWithOneElement(t *testing.T) {
+func TestLenWithBufferWithOneItem(t *testing.T) {
 	c := New(1)
 	c.Add(1)
-	if c.Length() != 1 {
-		t.Error("Expected buffer with one element to have length 1, was", c.Length())
+	if c.Len() != 1 {
+		t.Error("Expected buffer with one item to have length 1, was", c.Len())
 	}
 }
 
-func TestCapacityOfEmptyBuffer(t *testing.T) {
+func TestCapWithEmptyBuffer(t *testing.T) {
 	c := New(1)
-	if c.Capacity() != 1 {
-		t.Error("Expected empty buffer to have capacity 1, was", c.Capacity())
+	if c.Cap() != 1 {
+		t.Error("Expected empty buffer to have capacity 1, was", c.Cap())
 	}
 }
 
-func TestCapacityOfBufferWithOneElement(t *testing.T) {
+func TestCapWithBufferWithOneItem(t *testing.T) {
 	c := New(1)
-	if c.Capacity() != 1 {
-		t.Error("Expected buffer with one element to have capacity 1, was", c.Capacity())
+	if c.Cap() != 1 {
+		t.Error("Expected buffer with one item to have capacity 1, was", c.Cap())
 	}
 }
 
@@ -40,27 +40,49 @@ func TestAdd(t *testing.T) {
 	AssertEqualInt(t, c, []int{1, 2})
 }
 
-func TestAddWraps(t *testing.T) {
+func TestAddOverCapacity(t *testing.T) {
 	c := New(2)
 	c.Add(1)
 	c.Add(2)
 	c.Add(3)
 	AssertEqualInt(t, c, []int{2, 3})
-	if c.Length() != c.Capacity() {
-		t.Error("Expected wrapped buffer to have length == capacity", c.Length(), c.Capacity())
+	if c.Len() != c.Cap() {
+		t.Error("Expected wrapped buffer to have length == capacity", c.Len(), c.Cap())
 	}
 
 	c.Add(4)
 	AssertEqualInt(t, c, []int{3, 4})
-	if c.Length() != c.Capacity() {
-		t.Error("Expected wrapped buffer to have length == capacity", c.Length(), c.Capacity())
+	if c.Len() != c.Cap() {
+		t.Error("Expected wrapped buffer to have length == capacity", c.Len(), c.Cap())
+	}
+}
+
+func TestDoWithEmptyBuffer(t *testing.T) {
+	c := New(2)
+	c.Do(func(item interface{}) {
+		t.Error("Expected Do on empty buffer never to get called")
+	})
+}
+
+func TestDoWithBufferWithOneItem(t *testing.T) {
+	c := New(2)
+	c.Add(1)
+	count := uint(0)
+	c.Do(func(item interface{}) {
+		if item != 1 {
+			t.Error("Expected Do to get called with items in buffer", 1, item)
+		}
+		count++
+	})
+	if count != c.Len() {
+		t.Error("Expected Do to get called once per item in buffer")
 	}
 }
 
 func AssertEqualInt(t *testing.T, c *Circbuf, expected []int) {
-	actual := make([]interface{}, 0, c.Length())
-	c.ForEach(func(el interface{}) {
-		actual = append(actual, el)
+	actual := make([]interface{}, 0, c.Len())
+	c.Do(func(item interface{}) {
+		actual = append(actual, item)
 	})
 
 	if len(actual) != len(expected) {
@@ -68,8 +90,8 @@ func AssertEqualInt(t *testing.T, c *Circbuf, expected []int) {
 		return
 	}
 
-	for i, el := range actual {
-		if el != expected[i] {
+	for i, item := range actual {
+		if item != expected[i] {
 			t.Errorf("Expected buffer contents (%v) to equal (%v)", actual, expected)
 			return
 		}
