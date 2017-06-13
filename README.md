@@ -10,8 +10,9 @@
 
 ```go
   import (
-    "circbuf"
     "fmt"
+
+    "github.com/gmcnaughton/circbuf"
   )
 
   buf := circbuf.New(2)
@@ -20,7 +21,7 @@
 
   buf.Add(1)
   buf.Add(2)
-  buf.Add(3)
+  buf.Add(3) // ejects 1!
   buf.Do(func(el interface{}) {
     fmt.Println(el) // => 2, 3
   })
