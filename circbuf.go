@@ -5,13 +5,16 @@ package circbuf
 // thread-safe.
 type Circbuf struct {
 	items []interface{}
-	len   uint
-	cap   uint
-	head  uint
+	len   int
+	cap   int
+	head  int
 }
 
 // New returns an empty circular buffer with the given capacity.
-func New(cap uint) *Circbuf {
+func New(cap int) *Circbuf {
+	if cap < 1 {
+		panic("runtime error: circbuf.New: len out of range")
+	}
 	return &Circbuf{len: 0, cap: cap, items: make([]interface{}, cap)}
 }
 
@@ -29,17 +32,17 @@ func (c *Circbuf) Add(e interface{}) {
 // Do calls function f on each item of the ring, in forward order. The
 // behavior of Do is undefined if f changes *r.
 func (c *Circbuf) Do(f func(interface{})) {
-	for i := uint(0); i < c.len; i++ {
+	for i := 0; i < c.len; i++ {
 		f(c.items[(c.head+i)%c.cap])
 	}
 }
 
 // Len returns the number of items.
-func (c *Circbuf) Len() uint {
+func (c *Circbuf) Len() int {
 	return c.len
 }
 
 // Cap returns the number of slots.
-func (c *Circbuf) Cap() uint {
+func (c *Circbuf) Cap() int {
 	return c.cap
 }

@@ -4,6 +4,24 @@ import (
 	"testing"
 )
 
+func TestNewWithNegativeSize(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+
+	New(-1)
+	t.Error("Expected New with negative size to panic")
+}
+
+func TestNewWithZeroSize(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+
+	New(0)
+	t.Error("Expected New with size 0 to panic")
+}
+
 func TestLenWithEmptyBuffer(t *testing.T) {
 	c := New(1)
 	if c.Len() != 0 {
@@ -67,7 +85,7 @@ func TestDoWithEmptyBuffer(t *testing.T) {
 func TestDoWithBufferWithOneItem(t *testing.T) {
 	c := New(2)
 	c.Add(1)
-	count := uint(0)
+	count := 0
 	c.Do(func(item interface{}) {
 		if item != 1 {
 			t.Error("Expected Do to get called with items in buffer", 1, item)
