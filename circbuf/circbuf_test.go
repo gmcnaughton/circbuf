@@ -55,7 +55,7 @@ func TestAdd(t *testing.T) {
 	c := New(2)
 	c.Add(1)
 	c.Add(2)
-	AssertEqualInt(t, c, []int{1, 2})
+	AssertEqual(t, c, []interface{}{1, 2})
 }
 
 func TestAddOverCapacity(t *testing.T) {
@@ -63,13 +63,13 @@ func TestAddOverCapacity(t *testing.T) {
 	c.Add(1)
 	c.Add(2)
 	c.Add(3)
-	AssertEqualInt(t, c, []int{2, 3})
+	AssertEqual(t, c, []interface{}{2, 3})
 	if c.Len() != c.Cap() {
 		t.Error("Expected wrapped buffer to have length == capacity", c.Len(), c.Cap())
 	}
 
 	c.Add(4)
-	AssertEqualInt(t, c, []int{3, 4})
+	AssertEqual(t, c, []interface{}{3, 4})
 	if c.Len() != c.Cap() {
 		t.Error("Expected wrapped buffer to have length == capacity", c.Len(), c.Cap())
 	}
@@ -97,12 +97,25 @@ func TestDoWithBufferWithOneItem(t *testing.T) {
 	}
 }
 
-func AssertEqualInt(t *testing.T, c *Circbuf, expected []int) {
-	actual := make([]interface{}, 0, c.Len())
-	c.Do(func(item interface{}) {
-		actual = append(actual, item)
-	})
+func TestSliceWithEmptyBuffer(t *testing.T) {
+	c := New(2)
+	expected, actual := []interface{}{}, c.Slice()
+	AssertEqualSlice(t, actual, expected)
+}
 
+func TestSliceWithBufferWithOneItem(t *testing.T) {
+	c := New(2)
+	c.Add(1)
+	expected, actual := []interface{}{1}, c.Slice()
+	AssertEqualSlice(t, actual, expected)
+}
+
+func AssertEqual(t *testing.T, c *Circbuf, expected []interface{}) {
+	actual := c.Slice()
+	AssertEqualSlice(t, actual, expected)
+}
+
+func AssertEqualSlice(t *testing.T, actual []interface{}, expected []interface{}) {
 	if len(actual) != len(expected) {
 		t.Errorf("Expected buffer contents (%v) to equal (%v)", actual, expected)
 		return

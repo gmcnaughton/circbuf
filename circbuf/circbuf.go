@@ -29,8 +29,8 @@ func (c *Circbuf) Add(e interface{}) {
 	}
 }
 
-// Do calls function f on each item of the ring, in forward order. The
-// behavior of Do is undefined if f changes *r.
+// Do calls function f on each item of the buffer, in forward order. The
+// behavior of Do is undefined if f changes *c.
 func (c *Circbuf) Do(f func(interface{})) {
 	for i := 0; i < c.len; i++ {
 		f(c.items[(c.head+i)%c.cap])
@@ -45,4 +45,15 @@ func (c *Circbuf) Len() int {
 // Cap returns the number of items the buffer can hold before wrapping.
 func (c *Circbuf) Cap() int {
 	return c.cap
+}
+
+// Slice returns each item of the buffer, in forward order. Runs in linear time,
+// as all items must be copied to a temporary slice in order to linearize the
+// buffer.
+func (c *Circbuf) Slice() []interface{} {
+	items := make([]interface{}, 0, c.Len())
+	c.Do(func(item interface{}) {
+		items = append(items, item)
+	})
+	return items
 }
