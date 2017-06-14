@@ -4,7 +4,7 @@
 
 ### Installation
 
-    go get github.com/gmcnaughton/circbuf
+    go get github.com/gmcnaughton/go-experiments/circbuf
 
 ### Usage
 
@@ -12,7 +12,7 @@
   import (
     "fmt"
 
-    "github.com/gmcnaughton/circbuf"
+    "github.com/gmcnaughton/go-experiments/circbuf"
   )
 
   buf := circbuf.New(2)
