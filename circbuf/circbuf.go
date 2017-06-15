@@ -31,10 +31,14 @@ func (c *Circbuf) Add(e interface{}) {
 
 // Do calls function f on each item of the buffer, in forward order. The
 // behavior of Do is undefined if f changes *c.
-func (c *Circbuf) Do(f func(interface{})) {
+func (c *Circbuf) Do(f func(interface{}) error) error {
 	for i := 0; i < c.len; i++ {
-		f(c.items[(c.head+i)%c.cap])
+		err := f(c.items[(c.head+i)%c.cap])
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // Len returns the number of items in the buffer.
@@ -52,8 +56,12 @@ func (c *Circbuf) Cap() int {
 // buffer.
 func (c *Circbuf) Slice() []interface{} {
 	items := make([]interface{}, 0, c.Len())
-	c.Do(func(item interface{}) {
+	err := c.Do(func(item interface{}) error {
 		items = append(items, item)
+		return nil
 	})
+	if err != nil {
+		panic("runtime error: circbuf.Slice: error while iterating")
+	}
 	return items
 }

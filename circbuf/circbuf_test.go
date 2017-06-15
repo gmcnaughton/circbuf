@@ -1,12 +1,15 @@
 package circbuf
 
 import (
+	"errors"
 	"testing"
 )
 
 func TestNewWithNegativeSize(t *testing.T) {
 	defer func() {
-		recover()
+		if r := recover(); r == nil {
+			t.Error("Expected New with negative size to panic")
+		}
 	}()
 
 	New(-1)
@@ -15,7 +18,9 @@ func TestNewWithNegativeSize(t *testing.T) {
 
 func TestNewWithZeroSize(t *testing.T) {
 	defer func() {
-		recover()
+		if r := recover(); r == nil {
+			t.Error("Expected New with size 0 to panic")
+		}
 	}()
 
 	New(0)
@@ -77,23 +82,52 @@ func TestAddOverCapacity(t *testing.T) {
 
 func TestDoWithEmptyBuffer(t *testing.T) {
 	c := New(2)
-	c.Do(func(item interface{}) {
+	err := c.Do(func(item interface{}) error {
 		t.Error("Expected Do on empty buffer never to get called")
+		return nil
 	})
+	if err != nil {
+		t.Error("Expected Do on empty buffer to not return an error", err)
+	}
 }
 
 func TestDoWithBufferWithOneItem(t *testing.T) {
 	c := New(2)
 	c.Add(1)
 	count := 0
-	c.Do(func(item interface{}) {
+	err := c.Do(func(item interface{}) error {
 		if item != 1 {
 			t.Error("Expected Do to get called with items in buffer", 1, item)
 		}
 		count++
+		return nil
 	})
+	if err != nil {
+		t.Error("Expected Do on empty buffer to not return an error", err)
+	}
 	if count != c.Len() {
 		t.Error("Expected Do to get called once per item in buffer")
+	}
+}
+
+func TestDoHaltsWhenFuncReturnsError(t *testing.T) {
+	c := New(2)
+	c.Add(1)
+	c.Add(2)
+	sampleerr := errors.New("sample")
+	count := 0
+	err := c.Do(func(item interface{}) error {
+		if count > 0 {
+			return sampleerr
+		}
+		count++
+		return nil
+	})
+	if count != 1 {
+		t.Error("Expected Do to halt when error is returned")
+	}
+	if err != sampleerr {
+		t.Error("Expected Do to return the error from the wrapper func after halting")
 	}
 }
 
